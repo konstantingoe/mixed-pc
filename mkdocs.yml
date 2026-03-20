@@ -1,0 +1,46 @@
+# TODO: update site_name, repo_url, and site_url for your project
+site_name: graph_models - Python package for graph models
+
+repo_url: https://github.com/your-org/your-repo
+site_url: https://your-org.github.io/your-repo/
+
+theme:
+  name: material
+  highlightjs: true
+  color_mode: auto
+  hljs_languages:
+    - python
+  include_sidebar: true
+  features:
+    - navigation.expand
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.preview
+
+extra:
+  version:
+    default: latest
+    provider: mike
+
+plugins:
+  - mkdocstrings:
+      enable_inventory: true
+  - search
+  - mike:
+      canonical_version: latest
+
+markdown_extensions:
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.magiclink
+  - codehilite:
+      guess_lang: false
+
+nav:
+  - index.md
+  - reference.md

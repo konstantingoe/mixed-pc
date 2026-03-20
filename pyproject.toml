@@ -1,0 +1,140 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+# TODO: set name, authors, maintainers, description, and keywords for your project
+name = "graph_models"
+requires-python = ">=3.10.0"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+maintainers = [{ name = "Your Name", email = "you@example.com" }]
+license = "MIT"
+license-files = ["LICENSE"]
+description = "TODO: description of your package."
+keywords = [
+    "graphical models",
+    "directed graphs",
+    "undirected graphs",
+    "statistics",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+dependencies = [
+    "numpy>=1.21.0",
+    "scipy>=1.7.0",
+    "scikit-learn>=1.0.0",
+    "pandas>=1.3.0",
+    "networkx>=2.6.0",
+    "matplotlib>=3.5.0",
+]
+readme = "README.md"
+dynamic = ["version"]
+
+# TODO: update these URLs to match your repository
+[project.urls]
+Homepage = "https://github.com/your-org/your-repo"
+Issues = "https://github.com/your-org/your-repo/issues"
+Documentation = "https://your-org.github.io/your-repo/"
+
+[project.optional-dependencies]
+dev = [
+    "mkdocs",
+    "mike",
+    "mkdocs-material",
+    "mkdocstrings[python]",
+    "build",
+    "hatchling>=1.26",
+    "mypy",
+    "pre-commit",
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "twine",
+    "uv",
+]
+
+[tool.hatch.version]
+path = "graph_models/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["graph_models"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "venv_graph_models/",
+    "*.egg-info/",
+    ".ruff_cache/",
+    ".mypy_cache/",
+    ".pytest_cache/",
+    "site/",
+]
+
+[tool.ruff]
+preview = true
+
+lint.select = [
+    "C90", # McCabe
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "W",   # pycodestyle
+    "D",   # pydocstyle
+    "ISC", # flake8-implicit-str-concat
+    "N",   # pep8-naming
+    "NPY", # flake8-numpy
+    "PL",  # pylint
+    "PTH", # flake8-use-pathlib
+    "SIM", # flake8-simplify
+    "TD",  # flake8-todos
+    "UP",  # pyupgrade
+]
+line-length = 120
+lint.extend-unfixable = ["ISC"]
+lint.ignore = [
+    "ISC003",  # Explicit string concatenation
+    "PLR0913", # Too many arguments (common for config functions)
+    "PLR0914", # Too many local variables (acceptable in numerical code)
+    "PLR2004", # Magic value in comparison (acceptable for numerical thresholds)
+    "PLR6104", # Augmented assignment (not always clearer)
+    "PLR6301", # Method could be static (acceptable in test classes)
+    "ISC002",  # Implicitly concatenated string over multiple lines (acceptable for readability)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "NPY002",
+    "D",
+] # Allow legacy numpy random API and skip docstrings in tests
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pylint]
+max-public-methods = 35
+max-nested-blocks = 10
+
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.flake8-implicit-str-concat]
+allow-multiline = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "graph_models"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+strict_optional = true
