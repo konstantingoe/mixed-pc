@@ -173,7 +173,7 @@ def _make_positive_definite(mat: np.ndarray, min_eigenvalue: float = 1e-6) -> np
 class MixedFisherZ(CItest):
     """Fisher Z conditional independence test for mixed continuous/ordinal data.
 
-    Uses :func:`~mixed_pc.correlations.adhoc_polyserial` to build a pairwise
+    Uses :func:`~mixpc.correlations.adhoc_polyserial` to build a pairwise
     correlation matrix that automatically selects the right estimator for each
     variable pair:
 
@@ -193,6 +193,7 @@ class MixedFisherZ(CItest):
     """
 
     def __init__(self, n_levels_threshold: int = 20, max_cor: float = 0.9999) -> None:
+        """Init. Variables with < n_levels_threshold unique values are treated as ordinal."""
         self._n_levels_threshold = n_levels_threshold
         self._max_cor = max_cor
 

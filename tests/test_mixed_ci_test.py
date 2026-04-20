@@ -13,7 +13,6 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from scipy import stats
 
 
 # ---------------------------------------------------------------------------
@@ -21,16 +20,16 @@ from scipy import stats
 # ---------------------------------------------------------------------------
 
 def _load_module(name: str, filename: str):
-    package_dir = Path(__file__).resolve().parents[1] / "mixed-pc"
-    if "mixed_pc" not in sys.modules:
-        pkg = types.ModuleType("mixed_pc")
+    package_dir = Path(__file__).resolve().parents[1] / "mixpc"
+    if "mixpc" not in sys.modules:
+        pkg = types.ModuleType("mixpc")
         pkg.__path__ = [str(package_dir)]
-        sys.modules["mixed_pc"] = pkg
-    spec = importlib.util.spec_from_file_location(f"mixed_pc.{name}", package_dir / filename)
+        sys.modules["mixpc"] = pkg
+    spec = importlib.util.spec_from_file_location(f"mixpc.{name}", package_dir / filename)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Failed to load {filename}")
     module = importlib.util.module_from_spec(spec)
-    sys.modules[f"mixed_pc.{name}"] = module
+    sys.modules[f"mixpc.{name}"] = module
     spec.loader.exec_module(module)
     return module
 

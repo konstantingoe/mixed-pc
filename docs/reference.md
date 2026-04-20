@@ -1,9 +1,31 @@
 # API Reference
 
-<!-- TODO: update the autodoc directives below to point at your modules -->
+This page is auto-generated from source docstrings.
 
-This page is auto-generated from the source docstrings.
+## PC Algorithm
+
+:::mixpc.pc_algorithm.PC
+
+## Independence Tests
+
+:::mixpc.independence_tests.FisherZVec
+
+:::mixpc.independence_tests.MixedFisherZ
+
+## Correlation Measures
+
+:::mixpc.correlations.PolychoricCorrelation
+
+:::mixpc.correlations.PolyserialCorrelation
+
+:::mixpc.correlations.adhoc_polyserial
+
+:::mixpc.correlations.f_hat
 
 ## Graph Classes
 
-:::graph_models.graphs.UGRAPH
+:::mixpc.graphs.PDAG
+
+:::mixpc.graphs.DAG
+
+:::mixpc.graphs.UGRAPH

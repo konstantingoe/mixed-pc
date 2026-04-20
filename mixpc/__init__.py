@@ -1,4 +1,4 @@
-"""Python package for mixed-pc."""
+"""Python package for mixpc."""
 __version__ = "0.1.0"
 
 from .pc_algorithm import PC

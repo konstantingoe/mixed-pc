@@ -34,6 +34,7 @@ _CELL_FLOOR: float = 1e-12
 # Private utilities
 # ---------------------------------------------------------------------------
 
+
 def _to_array(x: object) -> np.ndarray:
     arr = np.asarray(x, dtype=float)
     if arr.ndim != 1:
@@ -74,17 +75,17 @@ def _thresholds(disc_var: np.ndarray) -> np.ndarray:
     """Normal-score thresholds for an ordinal variable."""
     n = len(disc_var)
     _, counts = np.unique(disc_var, return_counts=True)
-    return stats.norm.ppf(np.concatenate([[0], np.cumsum(counts / n)]))
+    return np.asarray(stats.norm.ppf(np.concatenate([[0], np.cumsum(counts / n)])))
 
 
 def _f_hat(x: np.ndarray) -> np.ndarray:
     """Winsorized nonparanormal transformation (Liu et al. 2009)."""
     n = x.shape[0]
-    npn_thresh = 1 / (4 * (n ** 0.25) * np.sqrt(np.pi * np.log(n)))
+    npn_thresh = 1 / (4 * (n**0.25) * np.sqrt(np.pi * np.log(n)))
     ranks = stats.rankdata(x, method="average")
     ecdf_values = np.clip(ranks / (n + 1), npn_thresh, 1 - npn_thresh)
-    transformed = stats.norm.ppf(ecdf_values)
-    return transformed / np.std(transformed, ddof=1)
+    transformed = np.asarray(stats.norm.ppf(ecdf_values))
+    return np.asarray(transformed / np.std(transformed, ddof=1))
 
 
 def _npn_pearson(cont: np.ndarray, disc: np.ndarray) -> float:
@@ -99,8 +100,8 @@ def _pi_rs(lower: tuple[float, float], upper: tuple[float, float], corr: float) 
     return float(mvn.cdf([u1, u2]) - mvn.cdf([l1, u2]) - mvn.cdf([u1, l2]) + mvn.cdf([l1, l2]))
 
 
-def _safe_mvn_pdf(mvn: object, x: np.ndarray) -> float:
-    return 0.0 if np.any(np.isinf(x)) else float(mvn.pdf(x))  # type: ignore[union-attr]
+def _safe_mvn_pdf(mvn: stats.multivariate_normal_frozen, x: np.ndarray) -> float:
+    return 0.0 if np.any(np.isinf(x)) else float(mvn.pdf(x))
 
 
 def _pi_rs_derivative(lower: np.ndarray, upper: np.ndarray, corr: float) -> float:
@@ -120,10 +121,12 @@ def _pi_rs_derivative(lower: np.ndarray, upper: np.ndarray, corr: float) -> floa
 # Abstract base
 # ---------------------------------------------------------------------------
 
+
 class CorrelationMeasure(ABC):
     """Abstract base for latent-Gaussian copula correlation estimators."""
 
     def __init__(self, max_cor: float = 0.9999) -> None:
+        """Init with clip bound max_cor in (0, 1)."""
         if not (0 < max_cor < 1):
             raise ValueError(f"`max_cor` must be in (0, 1), got {max_cor}.")
         self._max_cor = max_cor
@@ -135,6 +138,7 @@ class CorrelationMeasure(ABC):
 
     @property
     def correlation(self) -> float:
+        """Estimated correlation in [-max_cor, max_cor]. Raises if not yet fitted."""
         if self._correlation is None:
             raise RuntimeError("Call .fit(x, y) before accessing .correlation.")
         return self._correlation
@@ -154,6 +158,7 @@ class CorrelationMeasure(ABC):
 # Polychoric correlation
 # ---------------------------------------------------------------------------
 
+
 class PolychoricCorrelation(CorrelationMeasure):
     """MLE polychoric correlation between two ordinal variables.
 
@@ -172,6 +177,7 @@ class PolychoricCorrelation(CorrelationMeasure):
         max_iter: int = 100,
         tol: float = 1e-10,
     ) -> None:
+        """Init. solver: 'brent' (default) or 'newton' (Fisher scoring)."""
         super().__init__(max_cor=max_cor)
         if solver not in {"newton", "brent"}:
             raise ValueError(f"`solver` must be 'newton' or 'brent', got '{solver}'.")
@@ -180,6 +186,7 @@ class PolychoricCorrelation(CorrelationMeasure):
         self._tol = tol
 
     def fit(self, x: np.ndarray, y: np.ndarray) -> PolychoricCorrelation:
+        """Fit polychoric correlation to two ordinal arrays. Returns self."""
         x_arr, y_arr = self._prepare(x, y)
         _validate_ordinal(x_arr, "x")
         _validate_ordinal(y_arr, "y")
@@ -196,7 +203,9 @@ class PolychoricCorrelation(CorrelationMeasure):
             return self._polychoric_newton(n_rs, tx, ty, ux, uy)
         return self._polychoric_brent(n_rs, tx, ty, ux, uy)
 
-    def _polychoric_newton(self, n_rs, tx, ty, ux, uy) -> float:
+    def _polychoric_newton(
+        self, n_rs: np.ndarray, tx: np.ndarray, ty: np.ndarray, ux: np.ndarray, uy: np.ndarray
+    ) -> float:
         rho = 0.0
         bound = self._max_cor
         score_val = 0.0
@@ -210,11 +219,13 @@ class PolychoricCorrelation(CorrelationMeasure):
                     dp = _pi_rs_derivative(lower=np.array(lower), upper=np.array(upper), corr=rho)
                     ratio = dp / p
                     score_val += n_rs[i, j] * ratio
-                    info_val += n_rs[i, j] * ratio ** 2
+                    info_val += n_rs[i, j] * ratio**2
             if abs(score_val) < self._tol:
                 break
             if info_val < 1e-14:
-                logger.warning("Fisher information ≈ 0 at ρ=%.4f after %d iter; returning current estimate.", rho, iteration)
+                logger.warning(
+                    "Fisher information ≈ 0 at ρ=%.4f after %d iter; returning current estimate.", rho, iteration
+                )
                 break
             step = score_val / info_val
             rho_new = float(np.clip(rho + step, -bound, bound))
@@ -223,10 +234,14 @@ class PolychoricCorrelation(CorrelationMeasure):
                 break
             rho = rho_new
         else:
-            logger.warning("Fisher scoring did not converge in %d iterations (|score|=%.2e).", self._max_iter, abs(score_val))
+            logger.warning(
+                "Fisher scoring did not converge in %d iterations (|score|=%.2e).", self._max_iter, abs(score_val)
+            )
         return rho
 
-    def _polychoric_brent(self, n_rs, tx, ty, ux, uy) -> float:
+    def _polychoric_brent(
+        self, n_rs: np.ndarray, tx: np.ndarray, ty: np.ndarray, ux: np.ndarray, uy: np.ndarray
+    ) -> float:
         bound = self._max_cor
 
         def neg_log_likelihood(rho: float) -> float:
@@ -249,6 +264,7 @@ class PolychoricCorrelation(CorrelationMeasure):
 # Polyserial correlation
 # ---------------------------------------------------------------------------
 
+
 class PolyserialCorrelation(CorrelationMeasure):
     """Ad-hoc polyserial correlation between one continuous and one ordinal variable.
 
@@ -259,12 +275,14 @@ class PolyserialCorrelation(CorrelationMeasure):
     """
 
     def __init__(self, max_cor: float = 0.9999, n_levels_threshold: int = 20) -> None:
+        """Init. Variables with < n_levels_threshold unique values are treated as ordinal."""
         super().__init__(max_cor=max_cor)
         if n_levels_threshold < 2:
             raise ValueError("`n_levels_threshold` must be ≥ 2.")
         self._n_levels_threshold = n_levels_threshold
 
     def fit(self, x: np.ndarray, y: np.ndarray) -> PolyserialCorrelation:
+        """Fit polyserial correlation to a continuous/ordinal pair. Returns self."""
         x_arr, y_arr = self._prepare(x, y)
         x_is_ord = len(np.unique(x_arr)) < self._n_levels_threshold
         y_is_ord = len(np.unique(y_arr)) < self._n_levels_threshold
@@ -295,6 +313,7 @@ class PolyserialCorrelation(CorrelationMeasure):
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def f_hat(x: np.ndarray) -> np.ndarray:
     """Winsorized nonparanormal transformation (Liu et al. 2009).

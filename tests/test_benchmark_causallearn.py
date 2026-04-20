@@ -23,16 +23,16 @@ from causallearn.search.ConstraintBased.PC import pc as cl_pc
 # ---------------------------------------------------------------------------
 
 def _load_module(name: str, filename: str):
-    package_dir = Path(__file__).resolve().parents[1] / "mixed-pc"
-    if "mixed_pc" not in sys.modules:
-        pkg = types.ModuleType("mixed_pc")
+    package_dir = Path(__file__).resolve().parents[1] / "mixpc"
+    if "mixpc" not in sys.modules:
+        pkg = types.ModuleType("mixpc")
         pkg.__path__ = [str(package_dir)]
-        sys.modules["mixed_pc"] = pkg
-    spec = importlib.util.spec_from_file_location(f"mixed_pc.{name}", package_dir / filename)
+        sys.modules["mixpc"] = pkg
+    spec = importlib.util.spec_from_file_location(f"mixpc.{name}", package_dir / filename)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Failed to load {filename}")
     module = importlib.util.module_from_spec(spec)
-    sys.modules[f"mixed_pc.{name}"] = module
+    sys.modules[f"mixpc.{name}"] = module
     spec.loader.exec_module(module)
     return module
 
@@ -182,8 +182,6 @@ class TestCausalLearnCorrectness:
     def _run_both(self, dag_edges, n_samples=5000, alpha=0.01, seed=42):
         """Run both implementations on the same data, return metrics."""
         nodes = sorted({n for e in dag_edges for n in e})
-        node_idx = {n: i for i, n in enumerate(nodes)}
-
         rng = np.random.default_rng(seed)
         # Build data via ancestral sampling
         dag = nx.DiGraph()
@@ -308,7 +306,7 @@ class TestSpeedBenchmark:
             print(
                 f"\n  nodes={n_nodes:2d}, n={n_samples:5d} | "
                 f"ours={t_ours:.3f}s  causal-learn={t_cl:.3f}s  "
-                f"ratio={t_ours/t_cl:.2f}x"
+                f"ratio={t_ours / t_cl:.2f}x"
             )
 
         # Sanity: both finish in reasonable time

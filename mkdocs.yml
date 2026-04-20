@@ -1,5 +1,4 @@
-# TODO: update site_name, repo_url, and site_url for your project
-site_name: mixed-pc - Python package for learning causal graphical models from data with mixed variable types
+site_name: mixpc - Python package for learning causal graphical models from data with mixed variable types
 
 repo_url: https://github.com/konstantingoe/mixed-pc
 site_url: https://konstantingoe.github.io/mixed-pc/
