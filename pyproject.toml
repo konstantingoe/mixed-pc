@@ -4,17 +4,21 @@ build-backend = "hatchling.build"
 
 [project]
 # TODO: set name, authors, maintainers, description, and keywords for your project
-name = "graph_models"
+name = "mixed-pc"
 requires-python = ">=3.10.0"
-authors = [{ name = "Your Name", email = "you@example.com" }]
-maintainers = [{ name = "Your Name", email = "you@example.com" }]
+authors = [
+    { name = "Konstantin Göbler", email = "konstantingoebler@gmail.com" },
+]
+maintainers = [
+    { name = "Konstantin Göbler", email = "konstantingoebler@gmail.com" },
+]
 license = "MIT"
 license-files = ["LICENSE"]
-description = "TODO: description of your package."
+description = "This package provides an implementation of the Mixed PC algorithm for learning causal graphical models from data with mixed variable types."
 keywords = [
+    "causal discovery",
     "graphical models",
     "directed graphs",
-    "undirected graphs",
     "statistics",
 ]
 classifiers = [
@@ -42,9 +46,9 @@ dynamic = ["version"]
 
 # TODO: update these URLs to match your repository
 [project.urls]
-Homepage = "https://github.com/your-org/your-repo"
-Issues = "https://github.com/your-org/your-repo/issues"
-Documentation = "https://your-org.github.io/your-repo/"
+Homepage = "https://github.com/konstantingoe/mixed-pc"
+Issues = "https://github.com/konstantingoe/mixed-pc/issues"
+Documentation = "https://konstantingoe.github.io/mixed-pc/"
 
 [project.optional-dependencies]
 dev = [
@@ -64,14 +68,14 @@ dev = [
 ]
 
 [tool.hatch.version]
-path = "graph_models/__init__.py"
+path = "mixed-pc/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["graph_models"]
+packages = ["mixed-pc"]
 
 [tool.hatch.build.targets.sdist]
 exclude = [
-    "venv_graph_models/",
+    "venv_mixed-pc/",
     "*.egg-info/",
     ".ruff_cache/",
     ".mypy_cache/",
@@ -130,7 +134,7 @@ max-complexity = 10
 allow-multiline = false
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "graph_models"]
+testpaths = ["tests", "mixed-pc"]
 
 [tool.mypy]
 python_version = "3.11"

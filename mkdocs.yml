@@ -1,8 +1,8 @@
 # TODO: update site_name, repo_url, and site_url for your project
-site_name: graph_models - Python package for graph models
+site_name: mixed-pc - Python package for learning causal graphical models from data with mixed variable types
 
-repo_url: https://github.com/your-org/your-repo
-site_url: https://your-org.github.io/your-repo/
+repo_url: https://github.com/konstantingoe/mixed-pc
+site_url: https://konstantingoe.github.io/mixed-pc/
 
 theme:
   name: material
