@@ -1,44 +1,12 @@
 """Necessary independence tests for the PC algorithm."""
 
 from abc import ABCMeta, abstractmethod
-from itertools import product
 
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
-from .correlations import adhoc_polyserial
-
-
-class Itest(metaclass=ABCMeta):
-    """Abstract meta class for independence tests."""
-
-    def _check_input(
-        self,
-        x_data: np.ndarray | pd.DataFrame | pd.Series,
-        y_data: np.ndarray | pd.DataFrame | pd.Series,
-    ) -> None:
-        if not isinstance(x_data, np.ndarray | pd.DataFrame | pd.Series):
-            raise TypeError("x_data must be of type np.ndarray, pd.DataFrame, or pd.Series")
-        if not isinstance(y_data, np.ndarray | pd.DataFrame | pd.Series):
-            raise TypeError("y_data must be of type np.ndarray, pd.DataFrame, or pd.Series")
-
-    @abstractmethod
-    def test(
-        self,
-        x_data: np.ndarray | pd.DataFrame | pd.Series,
-        y_data: np.ndarray | pd.DataFrame | pd.Series,
-    ) -> tuple[float, float | str]:
-        """Abstract method for independence tests.
-
-        Args:
-            x_data (np.ndarray | pd.DataFrame | pd.Series): Variables involved in the test
-            y_data (np.ndarray | pd.DataFrame | pd.Series): Variables involved in the test
-
-
-        Returns:
-            tuple[float, float | str]: Test statistic and corresponding pvalue (Test decision).
-        """
+from .correlations import pairwise_latent_correlation
 
 
 class CItest(metaclass=ABCMeta):
@@ -77,92 +45,6 @@ class CItest(metaclass=ABCMeta):
         """
 
 
-class FisherZVec(CItest):
-    """Simple extension of standard Fisher-Z test for independence."""
-
-    def __init__(self) -> None:
-        """Init of the object."""
-        pass
-
-    @staticmethod
-    def _as_2d_array(data: np.ndarray | pd.DataFrame | pd.Series) -> np.ndarray:
-        """Convert supported tabular/array inputs to a 2D numpy array."""
-        arr = data.to_numpy() if isinstance(data, pd.DataFrame | pd.Series) else data
-
-        if arr.ndim == 1:
-            arr = arr[:, np.newaxis]
-        return arr
-
-    def test(
-        self,
-        x_data: np.ndarray | pd.DataFrame | pd.Series,
-        y_data: np.ndarray | pd.DataFrame | pd.Series,
-        z_data: np.ndarray | pd.DataFrame | pd.Series | None = None,
-        corr_threshold: float = 0.999,
-    ) -> tuple[float, float]:
-        """Retrieve (composite) p_value using Fisher z-transformation.
-
-        Appropriate when data is jointly Gaussian.
-
-        Args:
-            x_data (np.ndarray): X_data.
-            y_data (np.ndarray): Y_data.
-            z_data (np.ndarray | None): Z_data. defaults to None.
-            corr_threshold (float, optional): Threshold to make sure
-                r in [-1,1]. Defaults to 0.999.
-
-        Returns:
-            tuple[float,float]: test_statistic, p_value
-        """
-        x_arr = self._as_2d_array(x_data)
-        y_arr = self._as_2d_array(y_data)
-        z_arr = None if z_data is None else self._as_2d_array(z_data)
-
-        n = x_arr.shape[0]
-
-        if z_arr is not None:
-            sep_set_length = z_arr.shape[1]
-            corrdata = np.empty((n, 2 + z_arr.shape[1], x_arr.shape[1] * y_arr.shape[1]))
-            for k, (i, j) in enumerate(product(range(x_arr.shape[1]), range(y_arr.shape[1]))):
-                corrdata[:, :, k] = np.concatenate(
-                    [x_arr[:, i][:, np.newaxis], y_arr[:, j][:, np.newaxis], z_arr], axis=1
-                )
-            precision_matrices = np.empty((2 + z_arr.shape[1], 2 + z_arr.shape[1], x_arr.shape[1] * y_arr.shape[1]))
-            for k in range(precision_matrices.shape[-1]):
-                corrmat = np.corrcoef(corrdata[:, :, k].T)
-                try:
-                    precision_matrices[:, :, k] = np.linalg.inv(corrmat)
-                except np.linalg.LinAlgError as error:
-                    raise ValueError(
-                        "The correlation matrix of your data is singular. \
-                        Partial correlations cannot be estimated. Are there  \
-                        collinearities in your data?"
-                    ) from error
-
-            r = np.empty(precision_matrices.shape[-1])
-            for k in range(precision_matrices.shape[-1]):
-                precision_matrix = precision_matrices[:, :, k]
-                r[k] = -1 * precision_matrix[0, 1] / np.sqrt(np.abs(precision_matrix[0, 0] * precision_matrix[1, 1]))
-        else:
-            sep_set_length = 0
-            uncond = []
-            for i in range(x_arr.shape[1]):
-                uncond.append(np.corrcoef(np.concatenate([x_arr[:, i][:, np.newaxis], y_arr], axis=1).T)[1:, 0])
-            r = np.concatenate(uncond)
-
-        r = np.minimum(corr_threshold, np.maximum(-1 * corr_threshold, r))  # make r between -1 and 1
-        # Fisher’s z-transform
-        factor = np.sqrt(n - sep_set_length - 3)
-        z_transform = factor * 0.5 * np.log((1 + r) / (1 - r))
-        test_stat = factor * z_transform
-        p_value = 2 * (1 - norm.cdf(abs(z_transform)))
-
-        final_test_stat = test_stat[np.argmin(np.abs(test_stat))]
-        final_p_value = np.max(p_value)
-
-        return (float(final_test_stat), float(final_p_value))
-
-
 def _make_positive_definite(mat: np.ndarray, min_eigenvalue: float = 1e-6) -> np.ndarray:
     """Clip negative eigenvalues to make a symmetric matrix positive definite."""
     eigvals, eigvecs = np.linalg.eigh(mat)
@@ -173,7 +55,7 @@ def _make_positive_definite(mat: np.ndarray, min_eigenvalue: float = 1e-6) -> np
 class MixedFisherZ(CItest):
     """Fisher Z conditional independence test for mixed continuous/ordinal data.
 
-    Uses :func:`~mixpc.correlations.adhoc_polyserial` to build a pairwise
+    Uses :func:`~mixpc.correlations.pairwise_latent_correlation` to build a pairwise
     correlation matrix that automatically selects the right estimator for each
     variable pair:
 
@@ -208,7 +90,7 @@ class MixedFisherZ(CItest):
         corr = np.eye(k)
         for i in range(k):
             for j in range(i + 1, k):
-                r = adhoc_polyserial(
+                r = pairwise_latent_correlation(
                     cols[i],
                     cols[j],
                     max_cor=self._max_cor,
@@ -244,7 +126,7 @@ class MixedFisherZ(CItest):
 
         if z_data is None:
             # Marginal test: direct pairwise correlation
-            r = adhoc_polyserial(
+            r = pairwise_latent_correlation(
                 x_arr, y_arr,
                 max_cor=corr_threshold,
                 n_levels_threshold=self._n_levels_threshold,

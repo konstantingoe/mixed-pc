@@ -5,7 +5,7 @@ Ported from https://github.com/konstantingoe/mixed-gm (humlpy/correlation.py).
 Provides:
 * :class:`PolychoricCorrelation` — MLE polychoric for ordinal-ordinal pairs.
 * :class:`PolyserialCorrelation` — ad-hoc polyserial for continuous-ordinal pairs.
-* :func:`adhoc_polyserial` — dispatcher that selects the right estimator by
+* :func:`pairwise_latent_correlation` — dispatcher that selects the right estimator by
   variable type.
 * :func:`f_hat` — winsorized nonparanormal transformation (Liu et al. 2009).
 
@@ -338,7 +338,7 @@ def spearman(x: np.ndarray, y: np.ndarray) -> float:
     return float(rho)
 
 
-def adhoc_polyserial(
+def pairwise_latent_correlation(
     x: np.ndarray,
     y: np.ndarray,
     *,

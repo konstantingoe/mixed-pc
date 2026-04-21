@@ -103,9 +103,9 @@ for rule in ("conservative", "majority", "pc-max"):
 
 `learn_graph` returns a `PDAG` object. The `adjacency_matrix` property encodes:
 
-- `1` — directed edge (tail → head)
-- `2` — undirected edge
-- `0` — no edge
+- `A[i,j]=1, A[j,i]=0` — directed edge i→j
+- `A[i,j]=1, A[j,i]=1` — undirected edge i—j
+- `A[i,j]=0, A[j,i]=0` — no edge
 
 ```python
 print(pc.adjacency_matrix)

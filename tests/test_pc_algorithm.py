@@ -354,7 +354,7 @@ class TestOrientationStrategies:
         assert isinstance(result, PDAG)
 
     def test_adjacency_matrix_encoding(self, collider_data) -> None:
-        """adjacency_matrix: directed edge = 1, undirected = 2."""
+        """adjacency_matrix: directed i->j gives A[i,j]=1, A[j,i]=0."""
         pc = PC(alpha=0.05)
         pc.learn_graph(collider_data, v_structure_rule="conservative")
         amat = pc.adjacency_matrix

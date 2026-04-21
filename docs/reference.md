@@ -8,8 +8,6 @@ This page is auto-generated from source docstrings.
 
 ## Independence Tests
 
-:::mixpc.independence_tests.FisherZVec
-
 :::mixpc.independence_tests.MixedFisherZ
 
 ## Correlation Measures
@@ -18,7 +16,7 @@ This page is auto-generated from source docstrings.
 
 :::mixpc.correlations.PolyserialCorrelation
 
-:::mixpc.correlations.adhoc_polyserial
+:::mixpc.correlations.pairwise_latent_correlation
 
 :::mixpc.correlations.f_hat
 
