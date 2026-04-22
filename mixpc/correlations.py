@@ -28,6 +28,16 @@ from scipy.optimize import minimize_scalar
 logger = logging.getLogger(__name__)
 
 _CELL_FLOOR: float = 1e-12
+_CDF_CAP: float = 8.0  # Φ(±8) is within 1e-15 of {0, 1}; capping ±inf here avoids scipy versions that reject
+# infinite inputs to mvn.cdf/mvn.pdf.
+
+
+def _cap(v: float) -> float:
+    if v > _CDF_CAP:
+        return _CDF_CAP
+    if v < -_CDF_CAP:
+        return -_CDF_CAP
+    return v
 
 
 # ---------------------------------------------------------------------------
@@ -95,8 +105,8 @@ def _npn_pearson(cont: np.ndarray, disc: np.ndarray) -> float:
 def _pi_rs(lower: tuple[float, float], upper: tuple[float, float], corr: float) -> float:
     """Bivariate normal rectangle probability."""
     mvn = stats.multivariate_normal(mean=[0.0, 0.0], cov=[[1.0, corr], [corr, 1.0]])
-    l1, l2 = lower
-    u1, u2 = upper
+    l1, l2 = _cap(lower[0]), _cap(lower[1])
+    u1, u2 = _cap(upper[0]), _cap(upper[1])
     return float(mvn.cdf([u1, u2]) - mvn.cdf([l1, u2]) - mvn.cdf([u1, l2]) + mvn.cdf([l1, l2]))
 
 
@@ -107,8 +117,8 @@ def _safe_mvn_pdf(mvn: stats.multivariate_normal_frozen, x: np.ndarray) -> float
 def _pi_rs_derivative(lower: np.ndarray, upper: np.ndarray, corr: float) -> float:
     """Derivative of bivariate normal rectangle probability w.r.t. corr."""
     mvn = stats.multivariate_normal(mean=[0.0, 0.0], cov=[[1.0, corr], [corr, 1.0]])
-    l1, l2 = lower
-    u1, u2 = upper
+    l1, l2 = _cap(float(lower[0])), _cap(float(lower[1]))
+    u1, u2 = _cap(float(upper[0])), _cap(float(upper[1]))
     return (
         _safe_mvn_pdf(mvn, np.array([u1, u2]))
         - _safe_mvn_pdf(mvn, np.array([l1, u2]))
