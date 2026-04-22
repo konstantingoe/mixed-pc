@@ -1,4 +1,4 @@
-"""Tests for mixed-pc/graphs.py."""
+"""Tests for mixpc/graphs.py."""
 
 import importlib.util
 import sys
@@ -12,17 +12,17 @@ import pytest
 
 
 def _load_graphs_module():
-    package_dir = Path(__file__).resolve().parents[1] / "mixed-pc"
-    if "mixed_pc" not in sys.modules:
-        pkg = types.ModuleType("mixed_pc")
+    package_dir = Path(__file__).resolve().parents[1] / "mixpc"
+    if "mixpc" not in sys.modules:
+        pkg = types.ModuleType("mixpc")
         pkg.__path__ = [str(package_dir)]
-        sys.modules["mixed_pc"] = pkg
+        sys.modules["mixpc"] = pkg
 
-    spec = importlib.util.spec_from_file_location("mixed_pc.graphs", package_dir / "graphs.py")
+    spec = importlib.util.spec_from_file_location("mixpc.graphs", package_dir / "graphs.py")
     if spec is None or spec.loader is None:
         raise RuntimeError("Failed to load graphs module")
     module = importlib.util.module_from_spec(spec)
-    sys.modules["mixed_pc.graphs"] = module
+    sys.modules["mixpc.graphs"] = module
     spec.loader.exec_module(module)
     return module
 
@@ -405,7 +405,6 @@ class TestMeekRules:
             dir_edges=[("Z", "X"), ("Z", "Y1")],
             undir_edges=[("X", "Y1"), ("X", "Y2")],
         )
-        original_undir = set(p.undir_edges)
         result = rule_4(p)
         assert result is not p
 

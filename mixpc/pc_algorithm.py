@@ -13,7 +13,7 @@ import pandas as pd
 from abc import ABCMeta, abstractmethod
 
 from .graphs import DAG, GRAPH, PDAG, rule_1, rule_2, rule_3, rule_4
-from .independence_tests import CItest, FisherZVec
+from .independence_tests import CItest, MixedFisherZ
 
 
 class LearnAlgo(metaclass=ABCMeta):
@@ -54,14 +54,14 @@ class PC(LearnAlgo):
     - PC-Max: Orient based on highest p-value for independence
     """
 
-    def __init__(self, alpha: float = 0.05, test: type[CItest] = FisherZVec) -> None:
+    def __init__(self, alpha: float = 0.05, test: type[CItest] = MixedFisherZ) -> None:
         """Initialize PC algorithm.
 
         Args:
             alpha (float, optional): Significance threshold for independence tests.
                 Smaller values result in sparser graphs. Defaults to 0.05.
             test (type[CItest], optional): Conditional independence test class.
-                Defaults to FisherZVec.
+                Defaults to MixedFisherZ.
         """
         self.alpha: float = alpha
         self.pdag: PDAG = PDAG()
@@ -479,22 +479,11 @@ class PC(LearnAlgo):
 
         Returns:
             pd.DataFrame: Adjacency matrix of the PDAG.
-                - 1: directed edge
-                - 2: undirected edge
-                - 0: no edge
+                - A[i,j]=1, A[j,i]=0: directed edge i→j
+                - A[i,j]=1, A[j,i]=1: undirected edge i—j
+                - A[i,j]=0, A[j,i]=0: no edge
         """
-        amat = self.pdag.adjacency_matrix.values
-        cpdag_amat = amat.copy()
-        upper_triangle_indices = np.triu_indices_from(amat, k=1)
-        mask = (amat[upper_triangle_indices] == 1) & (amat[upper_triangle_indices[::-1]] == 1)
-
-        # Mark undirected edges as 2
-        cpdag_amat[upper_triangle_indices[0][mask], upper_triangle_indices[1][mask]] = 2
-        cpdag_amat[upper_triangle_indices[1][mask], upper_triangle_indices[0][mask]] = 2
-
-        amat_names = self.pdag.adjacency_matrix.columns
-
-        return pd.DataFrame(cpdag_amat, columns=amat_names, index=amat_names)
+        return self.pdag.adjacency_matrix
 
     @property
     def causal_order(self) -> list[str] | None:

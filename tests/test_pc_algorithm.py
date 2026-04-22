@@ -3,6 +3,7 @@
 import importlib.util
 import sys
 import types
+from collections import defaultdict, deque
 from pathlib import Path
 
 import numpy as np
@@ -14,16 +15,16 @@ import pytest
 # ---------------------------------------------------------------------------
 
 def _load_module(name: str, filename: str):
-    package_dir = Path(__file__).resolve().parents[1] / "mixed-pc"
-    if "mixed_pc" not in sys.modules:
-        pkg = types.ModuleType("mixed_pc")
+    package_dir = Path(__file__).resolve().parents[1] / "mixpc"
+    if "mixpc" not in sys.modules:
+        pkg = types.ModuleType("mixpc")
         pkg.__path__ = [str(package_dir)]
-        sys.modules["mixed_pc"] = pkg
-    spec = importlib.util.spec_from_file_location(f"mixed_pc.{name}", package_dir / filename)
+        sys.modules["mixpc"] = pkg
+    spec = importlib.util.spec_from_file_location(f"mixpc.{name}", package_dir / filename)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Failed to load {filename}")
     module = importlib.util.module_from_spec(spec)
-    sys.modules[f"mixed_pc.{name}"] = module
+    sys.modules[f"mixpc.{name}"] = module
     spec.loader.exec_module(module)
     return module
 
@@ -51,12 +52,12 @@ def _simulate_linear_gaussian(
     rng = np.random.default_rng(seed)
 
     # Determine causal order via topological sort
-    from collections import defaultdict, deque
     children: dict[str, list[str]] = defaultdict(list)
     in_degree: dict[str, int] = defaultdict(int)
     nodes: set[str] = set()
     for u, v in dag_edges:
-        nodes.add(u); nodes.add(v)
+        nodes.add(u)
+        nodes.add(v)
         children[u].append(v)
         in_degree[v] += 1
     for n in nodes:
@@ -206,7 +207,6 @@ class TestSkeletonDiscovery:
         pc._find_skeleton_stable(data=data, alpha=0.05)
         skel = pc.skel
         assert skel is not None
-        import numpy as np
         assert np.allclose(skel.values, skel.values.T)
 
     def test_sep_sets_symmetric(self) -> None:
@@ -349,13 +349,12 @@ class TestOrientationStrategies:
     # --- output consistency ---
 
     def test_pdag_is_returned(self, collider_data) -> None:
-        from mixed_pc.graphs import PDAG
         pc = PC(alpha=0.05)
         result = pc.learn_graph(collider_data)
         assert isinstance(result, PDAG)
 
     def test_adjacency_matrix_encoding(self, collider_data) -> None:
-        """adjacency_matrix: directed edge = 1, undirected = 2."""
+        """adjacency_matrix: directed i->j gives A[i,j]=1, A[j,i]=0."""
         pc = PC(alpha=0.05)
         pc.learn_graph(collider_data, v_structure_rule="conservative")
         amat = pc.adjacency_matrix
@@ -363,7 +362,6 @@ class TestOrientationStrategies:
         assert amat.loc["X0", "X2"] == 1
         assert amat.loc["X2", "X0"] == 0
         # Diagonal must be zero
-        import numpy as np
         assert np.all(np.diag(amat.values) == 0)
 
     def test_causal_order_none_for_partial_dag(self, collider_data) -> None:

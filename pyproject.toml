@@ -3,8 +3,7 @@ requires = ["hatchling >= 1.26"]
 build-backend = "hatchling.build"
 
 [project]
-# TODO: set name, authors, maintainers, description, and keywords for your project
-name = "mixed-pc"
+name = "mixpc"
 requires-python = ">=3.10.0"
 authors = [
     { name = "Konstantin Göbler", email = "konstantingoebler@gmail.com" },
@@ -44,7 +43,6 @@ dependencies = [
 readme = "README.md"
 dynamic = ["version"]
 
-# TODO: update these URLs to match your repository
 [project.urls]
 Homepage = "https://github.com/konstantingoe/mixed-pc"
 Issues = "https://github.com/konstantingoe/mixed-pc/issues"
@@ -68,10 +66,10 @@ dev = [
 ]
 
 [tool.hatch.version]
-path = "mixed-pc/__init__.py"
+path = "mixpc/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["mixed-pc"]
+packages = ["mixpc"]
 
 [tool.hatch.build.targets.sdist]
 exclude = [
@@ -115,9 +113,11 @@ lint.ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
-    "NPY002",
-    "D",
-] # Allow legacy numpy random API and skip docstrings in tests
+    "NPY002",  # legacy numpy random API
+    "D",       # no docstrings required in tests
+    "C901",    # complexity limit relaxed for test helpers
+]
+"mixpc/__init__.py" = ["N999"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -134,7 +134,7 @@ max-complexity = 10
 allow-multiline = false
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "mixed-pc"]
+testpaths = ["tests", "mixpc"]
 
 [tool.mypy]
 python_version = "3.11"

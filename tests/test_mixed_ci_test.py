@@ -1,7 +1,7 @@
 """Tests and simulation for MixedFisherZ and correlation utilities.
 
 Covers:
-- Unit tests for correlations.py (polychoric, polyserial, adhoc_polyserial, f_hat)
+- Unit tests for correlations.py (polychoric, polyserial, pairwise_latent_correlation, f_hat)
 - Unit tests for MixedFisherZ independence test
 - End-to-end simulation: PC with MixedFisherZ on mixed continuous/ordinal data
 """
@@ -13,7 +13,6 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from scipy import stats
 
 
 # ---------------------------------------------------------------------------
@@ -21,16 +20,16 @@ from scipy import stats
 # ---------------------------------------------------------------------------
 
 def _load_module(name: str, filename: str):
-    package_dir = Path(__file__).resolve().parents[1] / "mixed-pc"
-    if "mixed_pc" not in sys.modules:
-        pkg = types.ModuleType("mixed_pc")
+    package_dir = Path(__file__).resolve().parents[1] / "mixpc"
+    if "mixpc" not in sys.modules:
+        pkg = types.ModuleType("mixpc")
         pkg.__path__ = [str(package_dir)]
-        sys.modules["mixed_pc"] = pkg
-    spec = importlib.util.spec_from_file_location(f"mixed_pc.{name}", package_dir / filename)
+        sys.modules["mixpc"] = pkg
+    spec = importlib.util.spec_from_file_location(f"mixpc.{name}", package_dir / filename)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Failed to load {filename}")
     module = importlib.util.module_from_spec(spec)
-    sys.modules[f"mixed_pc.{name}"] = module
+    sys.modules[f"mixpc.{name}"] = module
     spec.loader.exec_module(module)
     return module
 
@@ -41,7 +40,7 @@ _pc_mod = _load_module("pc_algorithm", "pc_algorithm.py")
 
 PolychoricCorrelation = _corr_mod.PolychoricCorrelation
 PolyserialCorrelation = _corr_mod.PolyserialCorrelation
-adhoc_polyserial = _corr_mod.adhoc_polyserial
+pairwise_latent_correlation = _corr_mod.pairwise_latent_correlation
 f_hat = _corr_mod.f_hat
 spearman = _corr_mod.spearman
 MixedFisherZ = _itest_mod.MixedFisherZ
@@ -224,17 +223,17 @@ class TestPolyserialCorrelation:
 
 
 # ---------------------------------------------------------------------------
-# Tests: adhoc_polyserial dispatcher
+# Tests: pairwise_latent_correlation dispatcher
 # ---------------------------------------------------------------------------
 
 class TestAdhocPolyserial:
-    """Tests for the adhoc_polyserial dispatcher."""
+    """Tests for the pairwise_latent_correlation dispatcher."""
 
     def test_cont_cont_returns_npn_spearman(self) -> None:
         rng = _make_rng()
         x = rng.normal(size=500)
         y = 0.5 * x + rng.normal(size=500)
-        r = adhoc_polyserial(x, y)
+        r = pairwise_latent_correlation(x, y)
         assert -1.0 <= r <= 1.0
         assert r > 0  # should reflect positive association
 
@@ -245,7 +244,7 @@ class TestAdhocPolyserial:
         latent[:, 1] = 0.6 * latent[:, 0] + np.sqrt(1 - 0.36) * rng.normal(size=n)
         x = _ordinal(latent[:, 0], n_cats=3)
         y = _ordinal(latent[:, 1], n_cats=3)
-        r = adhoc_polyserial(x, y)
+        r = pairwise_latent_correlation(x, y)
         assert r > 0.3  # should detect positive association
 
     def test_mixed_delegates_to_polyserial(self) -> None:
@@ -253,14 +252,14 @@ class TestAdhocPolyserial:
         n = 1000
         x = rng.normal(size=n)
         y = _ordinal(0.5 * x + rng.normal(size=n), n_cats=4)
-        r = adhoc_polyserial(x, y)
+        r = pairwise_latent_correlation(x, y)
         assert r > 0
 
     def test_result_clipped(self) -> None:
         rng = _make_rng()
         x = rng.normal(size=200)
         y = rng.normal(size=200)
-        r = adhoc_polyserial(x, y, max_cor=0.9)
+        r = pairwise_latent_correlation(x, y, max_cor=0.9)
         assert abs(r) <= 0.9
 
 
