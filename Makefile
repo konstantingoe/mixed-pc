@@ -34,4 +34,4 @@ precommit:
 
 test:
 	: # Run pytest
-	python -m pytest
+	${PYTHON} -m pytest

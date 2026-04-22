@@ -123,8 +123,7 @@ Pass `v_structure_rule` to `learn_graph`:
 ├── tests/
 │   ├── test_pc_algorithm.py
 │   ├── test_mixed_ci_test.py
-│   ├── test_graphs.py
-│   └── test_benchmark_causallearn.py
+│   └── test_graphs.py
 ├── docs/
 │   ├── index.md
 │   └── reference.md
