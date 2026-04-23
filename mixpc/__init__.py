@@ -4,6 +4,7 @@ __version__ = "0.1.0"
 from .pc_algorithm import PC
 from .independence_tests import MixedFisherZ
 from .correlations import PolychoricCorrelation, PolyserialCorrelation, pairwise_latent_correlation, f_hat
+from .prior_knowledge import PriorKnowledge
 
 __all__ = [
     "PC",
@@ -12,4 +13,5 @@ __all__ = [
     "PolyserialCorrelation",
     "pairwise_latent_correlation",
     "f_hat",
+    "PriorKnowledge",
 ]

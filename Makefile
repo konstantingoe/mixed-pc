@@ -35,3 +35,7 @@ precommit:
 test:
 	: # Run pytest
 	${PYTHON} -m pytest
+
+coverage:
+	: # Run pytest with coverage and print missing lines
+	${PYTHON} -m pytest --cov --cov-report=term-missing
