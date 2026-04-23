@@ -5,6 +5,7 @@ This module contains:
   and three v-structure determination rules from Ramsey et al. (2016)
 """
 
+from contextlib import suppress
 from itertools import combinations
 from typing import Any, Literal
 
@@ -14,6 +15,7 @@ from abc import ABCMeta, abstractmethod
 
 from .graphs import DAG, GRAPH, PDAG, rule_1, rule_2, rule_3, rule_4
 from .independence_tests import CItest, MixedFisherZ
+from .prior_knowledge import PriorKnowledge
 
 
 class LearnAlgo(metaclass=ABCMeta):
@@ -68,11 +70,14 @@ class PC(LearnAlgo):
         self.skel: pd.DataFrame | None = None
         self.sep_sets: dict[tuple[str, str], set[str]] = {}
         self.ci_test = test()
+        self.prior: PriorKnowledge | None = None
+        self.ci_test_count: int = 0
 
     def learn_graph(
         self,
         data_dict: dict[str, np.ndarray],
         v_structure_rule: Literal["conservative", "majority", "pc-max"] = "conservative",
+        prior_knowledge: PriorKnowledge | None = None,
     ) -> PDAG:
         """Learn causal graph using PC stable algorithm.
 
@@ -81,6 +86,8 @@ class PC(LearnAlgo):
             v_structure_rule (Literal["conservative", "majority", "pc-max"], optional):
                 v-structure determination rule from Ramsey et al. (2016).
                 Defaults to "conservative".
+            prior_knowledge (PriorKnowledge, optional): Edge/direction/layering hints
+                consulted across all three phases. Defaults to None.
 
         Returns:
             PDAG: Partially directed acyclic graph.
@@ -93,14 +100,30 @@ class PC(LearnAlgo):
                 f"v_structure_rule must be 'conservative', 'majority', or 'pc-max', got {v_structure_rule}"
             )
 
-        # Phase 1: Skeleton learning (PC stable)
+        if prior_knowledge is not None:
+            prior_knowledge.validate(set(data_dict.keys()))
+        self.prior = prior_knowledge
+        self.ci_test_count = 0
+
+        # Phase 1: Skeleton learning (PC stable, optionally constrained by prior knowledge)
         self._find_skeleton_stable(data=data_dict, alpha=self.alpha)
+
+        # Pre-orient edges with a uniquely allowed direction (layering / required_directions /
+        # forbidden_directions that pin the alternative). Done before v-structure phase so that
+        # downstream rules see the constraints as already-decided orientations.
+        if self.prior is not None:
+            self._apply_prior_orientations()
 
         # Phase 2: V-structure orientation using chosen rule
         self._orient_v_structures(data=data_dict, alpha=self.alpha, rule=v_structure_rule)
 
         # Phase 3: Meek rule application for remaining undirected edges
         self._apply_meek_rules()
+
+        # Final pass: if Meek introduced an orientation that prior knowledge forbids, flip it
+        # when the reverse is allowed. Both-directions-forbidden edges are left as-is.
+        if self.prior is not None:
+            self._reconcile_with_prior()
 
         return self.pdag
 
@@ -128,80 +151,93 @@ class PC(LearnAlgo):
             index=node_names,
         )
 
+        # Drop forbidden edges before the first CI test — they are never even considered.
+        if self.prior is not None:
+            for a, b in self.prior.forbidden_edges:
+                skeleton.loc[a, b] = skeleton.loc[b, a] = 0
+
         self.sep_sets = {}
         d = 0
 
         # Iterate over conditioning set sizes until no pair can be tested further.
         while True:
-            # Get all adjacent pairs based on current skeleton
             adj_pairs = self._get_adjacent_pairs(skeleton)
-
             if not adj_pairs:
                 break
 
             # Snapshot adjacencies once per level (PC-stable: neighbors must not change mid-level)
             skeleton_snapshot = skeleton.copy()
 
-            # For each adjacent pair, find separating sets of size d
             any_test_possible = False
             for i, j in adj_pairs:
-                if skeleton.loc[i, j] == 0:
-                    # Already disconnected
-                    continue
+                if self._try_separate_pair(
+                    i, j, d=d, data=data, alpha=alpha,
+                    skeleton=skeleton, skeleton_snapshot=skeleton_snapshot,
+                ):
+                    any_test_possible = True
 
-                # Use neighbors from both endpoints as candidate separators.
-                row_i_vals = skeleton_snapshot.loc[i].to_numpy()
-                row_j_vals = skeleton_snapshot.loc[j].to_numpy()
-                neighbors_i = {
-                    str(skeleton.columns[idx])
-                    for idx, val in enumerate(row_i_vals)
-                    if val == 1 and skeleton.columns[idx] != j
-                }
-                neighbors_j = {
-                    str(skeleton.columns[idx])
-                    for idx, val in enumerate(row_j_vals)
-                    if val == 1 and skeleton.columns[idx] != i
-                }
-                candidate_neighbors = neighbors_i.union(neighbors_j)
-
-                # Check all subsets of size d
-                if len(candidate_neighbors) < d:
-                    continue
-
-                any_test_possible = True
-
-                for sep_set_subset in combinations(sorted(candidate_neighbors), d):
-                    sep_set_list = list(sep_set_subset)
-
-                    # Perform independence test
-                    if not sep_set_list:
-                        _, p_value = self.ci_test.test(x_data=data[i], y_data=data[j])
-                    else:
-                        z_data = np.concatenate(
-                            [data[node] for node in sep_set_list],
-                            axis=1,
-                        )
-                        _, p_value = self.ci_test.test(
-                            x_data=data[i],
-                            y_data=data[j],
-                            z_data=z_data,
-                        )
-
-                    # If independent, remove edge and record separation set
-                    if p_value >= alpha:
-                        skeleton.loc[i, j] = skeleton.loc[j, i] = 0
-                        self.sep_sets[(i, j)] = set(sep_set_list)
-                        self.sep_sets[(j, i)] = set(sep_set_list)
-                        break
-
-            # Stop when no pair has enough adjacent variables for this conditioning size.
             if not any_test_possible:
                 break
-
             d += 1
 
         self.skel = skeleton
         self.pdag = PDAG.from_pandas_adjacency(skeleton)
+
+    def _try_separate_pair(
+        self,
+        i: str,
+        j: str,
+        *,
+        d: int,
+        data: dict[str, np.ndarray],
+        alpha: float,
+        skeleton: pd.DataFrame,
+        skeleton_snapshot: pd.DataFrame,
+    ) -> bool:
+        """Test the (i, j) pair at conditioning-set size ``d``; mutates ``skeleton`` if separated.
+
+        Returns ``True`` when a CI test was actually attempted at this level (so the caller
+        knows to keep iterating with a larger ``d``).
+        """
+        if skeleton.loc[i, j] == 0:
+            return False
+        if self.prior is not None and self.prior.is_required_edge(i, j):
+            return False
+
+        candidate_neighbors = self._candidate_separators(i, j, skeleton_snapshot)
+        if self.prior is not None:
+            candidate_neighbors = set(
+                self.prior.filter_separating_set(i, j, list(candidate_neighbors))
+            )
+        if len(candidate_neighbors) < d:
+            return False
+
+        for sep_set_subset in combinations(sorted(candidate_neighbors), d):
+            sep_set_list = list(sep_set_subset)
+            if not sep_set_list:
+                _, p_value = self.ci_test.test(x_data=data[i], y_data=data[j])
+            else:
+                z_data = np.concatenate([data[node] for node in sep_set_list], axis=1)
+                _, p_value = self.ci_test.test(x_data=data[i], y_data=data[j], z_data=z_data)
+            self.ci_test_count += 1
+
+            if p_value >= alpha:
+                skeleton.loc[i, j] = skeleton.loc[j, i] = 0
+                self.sep_sets[(i, j)] = set(sep_set_list)
+                self.sep_sets[(j, i)] = set(sep_set_list)
+                return True
+        return True
+
+    def _candidate_separators(
+        self, i: str, j: str, skeleton_snapshot: pd.DataFrame
+    ) -> set[str]:
+        """Union of neighbors of ``i`` and ``j`` (excluding each other) in the snapshot."""
+        cols = skeleton_snapshot.columns
+        row_i = skeleton_snapshot.loc[i].to_numpy()
+        row_j = skeleton_snapshot.loc[j].to_numpy()
+        neighbors_i = {str(cols[idx]) for idx, val in enumerate(row_i) if val == 1 and cols[idx] != j}
+        neighbors_j = {str(cols[idx]) for idx, val in enumerate(row_j) if val == 1 and cols[idx] != i}
+        return neighbors_i | neighbors_j
 
     def _get_adjacent_pairs(self, skeleton: pd.DataFrame) -> list[tuple[str, str]]:
         """Get all adjacent pairs in the skeleton.
@@ -277,6 +313,13 @@ class PC(LearnAlgo):
                 raise ValueError(f"Unknown rule: {rule}")
 
             if is_v_structure:
+                # Skip when the proposed v-structure conflicts with prior knowledge: orienting
+                # i -> j (or k -> j) is forbidden — for example, j is in an earlier layer.
+                if self.prior is not None and (
+                    self.prior.is_forbidden_direction(i, j) or self.prior.is_forbidden_direction(k, j)
+                ):
+                    continue
+
                 # Orient as v-structure: i -> j <- k (only if edges are still undirected)
                 try:
                     if pdag.is_adjacent(i, j) and ((i, j) in pdag.undir_edges or (j, i) in pdag.undir_edges):
@@ -314,6 +357,11 @@ class PC(LearnAlgo):
         all_neighbors.discard(i)
         all_neighbors.discard(k)
 
+        # Layering: drop "future" nodes from the conditioning pool to keep v-structure
+        # decisions consistent with the skeleton phase.
+        if self.prior is not None:
+            all_neighbors = set(self.prior.filter_separating_set(i, k, list(all_neighbors)))
+
         # Test all possible subsets
         for r in range(len(all_neighbors) + 1):
             for sep_set in combinations(sorted(all_neighbors), r):
@@ -332,6 +380,7 @@ class PC(LearnAlgo):
                         y_data=data[k],
                         z_data=z_data,
                     )
+                self.ci_test_count += 1
 
                 potential_sets.append((set(sep_set), p_value))
 
@@ -437,6 +486,47 @@ class PC(LearnAlgo):
 
         # Orient as v-structure if independence is more likely without j
         return max_p_without_j > max_p_with_j
+
+    def _apply_prior_orientations(self) -> None:
+        """Orient every undirected edge whose direction is uniquely fixed by prior knowledge.
+
+        Runs after skeleton discovery and before v-structure orientation. Layering between
+        layers, explicit ``required_directions``, and ``forbidden_directions`` that pin the
+        alternative all flow through ``PriorKnowledge.required_direction_for``.
+        """
+        assert self.prior is not None
+        pdag = self.pdag.copy()
+        for i, j in list(pdag.undir_edges):
+            forced = self.prior.required_direction_for(i, j)
+            if forced is None:
+                continue
+            tail, head = forced
+            # Edge may have been oriented by an earlier iteration of this loop — ignore.
+            with suppress(AssertionError):
+                pdag.undir_to_dir_edge(tail=tail, head=head)
+        self.pdag = pdag
+
+    def _reconcile_with_prior(self) -> None:
+        """Flip directed edges Meek introduced in a forbidden direction when the reverse is allowed.
+
+        If both directions are forbidden, the edge is left untouched: the user contradicted
+        themselves about an edge that PC nonetheless found in the skeleton, and silently
+        rewriting it is worse than surfacing the inconsistency.
+        """
+        assert self.prior is not None
+        pdag = self.pdag.copy()
+        flipped = False
+        for tail, head in list(pdag.dir_edges):
+            if not self.prior.is_forbidden_direction(tail, head):
+                continue
+            if self.prior.is_forbidden_direction(head, tail):
+                continue
+            # Use the public remove + private add to swap orientation in place.
+            pdag.remove_edge(tail, head)
+            pdag._add_dir_edge(head, tail)
+            flipped = True
+        if flipped:
+            self.pdag = pdag
 
     def _apply_meek_rules(self) -> None:
         """Apply Meek rules to orient remaining undirected edges.
