@@ -18,11 +18,16 @@
     - Both continuous → nonparanormal Spearman sin-transform (Liu et al. 2009)
     - Both ordinal → polychoric MLE (Brent or Newton-Fisher solver)
     - Mixed → ad-hoc polyserial correlation
+- **Prior knowledge** — required/forbidden edges, required/forbidden directions, and partial temporal layering (e.g. production-line stations) integrated into all three PC phases.
 - **Full Meek rule application** — R1–R4 applied to maximally orient remaining undirected edges.
 
 ---
 
 ## Installation
+
+```bash
+pip install mixpc
+```
 
 ### From source
 
@@ -110,6 +115,28 @@ Pass `v_structure_rule` to `learn_graph`:
 
 ---
 
+## Prior knowledge
+
+Encode domain constraints with `PriorKnowledge` and pass it to `learn_graph`. All five hint types compose: required/forbidden edges, required/forbidden directions, and a partial temporal layering.
+
+```python
+from mixpc import PC, PriorKnowledge
+
+# Production-line example: three stations, intra-station ordering unknown
+prior = PriorKnowledge(
+    layering=[["X0", "X1"], ["X2"], ["X3"]],   # X0,X1 precede X2 precedes X3
+    forbidden_directions=[("X3", "X2")],       # explicit override (redundant with layering here)
+    required_edges=[("X0", "X2")],             # never tested for removal
+)
+
+pc = PC(alpha=0.05)
+pdag = pc.learn_graph(data, v_structure_rule="majority", prior_knowledge=prior)
+```
+
+Layering is consulted in all three PC phases: it prunes conditioning sets during skeleton discovery, blocks impossible v-structures, and propagates orientations through the Meek rules.
+
+---
+
 ## Project Structure
 
 ```
@@ -119,14 +146,11 @@ Pass `v_structure_rule` to `learn_graph`:
 │   ├── pc_algorithm.py
 │   ├── independence_tests.py
 │   ├── correlations.py
-│   └── graphs.py
+│   ├── prior_knowledge.py
+│   ├── graphs.py
+│   └── py.typed
 ├── tests/
-│   ├── test_pc_algorithm.py
-│   ├── test_mixed_ci_test.py
-│   └── test_graphs.py
 ├── docs/
-│   ├── index.md
-│   └── reference.md
 ├── pyproject.toml
 ├── Makefile
 ├── mkdocs.yml
@@ -138,13 +162,8 @@ Pass `v_structure_rule` to `learn_graph`:
 ## Testing
 
 ```bash
-pytest tests/ -v
-```
-
-With coverage report:
-
-```bash
-pytest tests/ --cov=mixpc --cov-report=html
+make test       # plain pytest
+make coverage   # pytest with coverage + missing-line report
 ```
 
 ---

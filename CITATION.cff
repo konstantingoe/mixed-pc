@@ -1,0 +1,65 @@
+cff-version: 1.2.0
+message: "If you use mixpc in academic work, please cite it as below."
+title: "mixpc: Mixed PC Algorithm for Causal Discovery"
+abstract: >-
+  A Python implementation of the PC algorithm (PC-stable variant) for learning
+  causal graphical models from data with mixed continuous and ordinal
+  variables, with optional user-supplied prior knowledge including partial
+  temporal layering.
+authors:
+  - family-names: Göbler
+    given-names: Konstantin
+    email: konstantingoebler@gmail.com
+version: 0.1.0
+date-released: "2026-04-23"
+license: MIT
+repository-code: "https://github.com/konstantingoe/mixed-pc"
+url: "https://konstantingoe.github.io/mixed-pc/"
+keywords:
+  - causal discovery
+  - graphical models
+  - PC algorithm
+  - mixed data
+  - polychoric correlation
+references:
+  - type: article
+    authors:
+      - family-names: Colombo
+        given-names: Diego
+      - family-names: Maathuis
+        given-names: Marloes H.
+    title: "Order-independent constraint-based causal structure learning"
+    journal: "Journal of Machine Learning Research"
+    volume: 15
+    start: 3741
+    end: 3782
+    year: 2014
+  - type: conference-paper
+    authors:
+      - family-names: Ramsey
+        given-names: Joseph
+      - family-names: Zhang
+        given-names: Jiji
+      - family-names: Spirtes
+        given-names: Peter
+    title: "Adjacency-faithfulness and conservative causal inference"
+    conference:
+      name: "Uncertainty in Artificial Intelligence (UAI)"
+    year: 2016
+  - type: article
+    authors:
+      - family-names: Göbler
+        given-names: Konstantin
+      - family-names: Drton
+        given-names: Mathias
+      - family-names: Mukherjee
+        given-names: Sach
+      - family-names: Miloschewski
+        given-names: Anne
+    title: "High-dimensional undirected graphical models for arbitrary mixed data"
+    journal: "Electronic Journal of Statistics"
+    volume: 18
+    issue: 1
+    year: 2024
+    doi: "10.1214/24-EJS2254"
+    url: "https://projecteuclid.org/journals/electronic-journal-of-statistics/volume-18/issue-1/High-dimensional-undirected-graphical-models-for-arbitrary-mixed-data/10.1214/24-EJS2254.full"

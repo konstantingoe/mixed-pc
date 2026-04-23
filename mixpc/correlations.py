@@ -13,6 +13,10 @@ References:
     Liu, Han, Lafferty, John and Wasserman, Larry. (2009).
     The nonparanormal: Semi-parametric estimation of high dimensional
     undirected graphs. JMLR 10(80), 2295–2328.
+
+    Göbler, Konstantin, Drton, Mathias, Mukherjee, Sach and Miloschewski, Anne.
+    (2024). High-dimensional undirected graphical models for arbitrary mixed
+    data. Electronic Journal of Statistics 18(1). doi:10.1214/24-EJS2254.
 """
 
 from __future__ import annotations
