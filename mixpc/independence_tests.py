@@ -53,7 +53,7 @@ def _make_positive_definite(mat: np.ndarray, min_eigenvalue: float = 1e-6) -> np
 
 
 class MixedFisherZ(CItest):
-    """Fisher Z conditional independence test for mixed continuous/ordinal data.
+    """Nonparanormal Fisher Z conditional independence test for mixed continuous/ordinal data.
 
     Uses :func:`~mixpc.correlations.pairwise_latent_correlation` to build a pairwise
     correlation matrix that automatically selects the right estimator for each

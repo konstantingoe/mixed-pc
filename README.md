@@ -51,7 +51,7 @@ make sync-venv
 
 ## Quick Start
 
-### Continuous data (Fisher Z test)
+### Continuous data (Nonparanormal Fisher Z test)
 
 ```python
 import numpy as np
@@ -215,6 +215,7 @@ mike set-default --push latest   # first time only
 - Colombo, D. & Maathuis, M.H. (2014). Order-independent constraint-based causal structure learning. *JMLR* 15, 3741–3782.
 - Ramsey, J., Zhang, J. & Spirtes, P. (2016). Adjacency-faithfulness and conservative causal inference. *UAI*.
 - Liu, H., Lafferty, J. & Wasserman, L. (2009). The nonparanormal. *JMLR* 10, 2295–2328.
+- Göbler, K., Drton, M., Mukherjee, S. & Miloschewski, A. (2024). High-dimensional undirected graphical models for arbitrary mixed data. *Electronic Journal of Statistics* 18(1). [doi:10.1214/24-EJS2254](https://doi.org/10.1214/24-EJS2254).
 
 ## License
 
