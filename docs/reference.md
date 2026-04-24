@@ -6,6 +6,10 @@ This page is auto-generated from source docstrings.
 
 :::mixpc.pc_algorithm.PC
 
+## Prior Knowledge
+
+:::mixpc.prior_knowledge.PriorKnowledge
+
 ## Independence Tests
 
 :::mixpc.independence_tests.MixedFisherZ
