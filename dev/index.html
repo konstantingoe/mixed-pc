@@ -320,10 +320,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#continuous-data-fisher-z-test" class="md-nav__link">
+  <a href="#continuous-data-nonparanormal-fisher-z-test" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Continuous data (Fisher Z test)
+        Continuous data (Nonparanormal Fisher Z test)
       
     </span>
   </a>
@@ -351,6 +351,17 @@
     <span class="md-ellipsis">
       
         Orientation strategies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prior-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prior knowledge
       
     </span>
   </a>
@@ -525,10 +536,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#continuous-data-fisher-z-test" class="md-nav__link">
+  <a href="#continuous-data-nonparanormal-fisher-z-test" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Continuous data (Fisher Z test)
+        Continuous data (Nonparanormal Fisher Z test)
       
     </span>
   </a>
@@ -556,6 +567,17 @@
     <span class="md-ellipsis">
       
         Orientation strategies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prior-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prior knowledge
       
     </span>
   </a>
@@ -666,62 +688,66 @@
 <li>Mixed → ad-hoc polyserial correlation</li>
 </ul>
 </li>
+<li><strong>Prior knowledge</strong> — required/forbidden edges, required/forbidden directions, and partial temporal layering integrated into all three PC phases.</li>
 <li><strong>Full Meek rule application</strong> — R1–R4 applied to maximally orient remaining undirected edges.</li>
 </ul>
 <hr />
 <h2 id="installation">Installation</h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/konstantingoe/mixpc.git
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>mixpc
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>make<span class="w"> </span>sync-venv
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>mixpc
+</span></code></pre></div>
+<p>Or from source:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/konstantingoe/mixed-pc.git
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">cd</span><span class="w"> </span>mixed-pc
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>make<span class="w"> </span>sync-venv
 </span></code></pre></div>
 <hr />
 <h2 id="quick-start">Quick Start</h2>
-<h3 id="continuous-data-fisher-z-test">Continuous data (Fisher Z test)</h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mixpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">PC</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">n</span> <span class="o">=</span> <span class="mi">2000</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># Ground truth: X0 -&gt; X2 &lt;- X1, X2 -&gt; X3</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">x0</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="n">x1</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">x2</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">x1</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">x3</span> <span class="o">=</span> <span class="n">x2</span> <span class="o">+</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;X0&quot;</span><span class="p">:</span> <span class="n">x0</span><span class="p">,</span> <span class="s2">&quot;X1&quot;</span><span class="p">:</span> <span class="n">x1</span><span class="p">,</span> <span class="s2">&quot;X2&quot;</span><span class="p">:</span> <span class="n">x2</span><span class="p">,</span> <span class="s2">&quot;X3&quot;</span><span class="p">:</span> <span class="n">x3</span><span class="p">}</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="n">pc</span> <span class="o">=</span> <span class="n">PC</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="n">pdag</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">learn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">v_structure_rule</span><span class="o">=</span><span class="s2">&quot;conservative&quot;</span><span class="p">)</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Directed edges:&quot;</span><span class="p">,</span> <span class="n">pdag</span><span class="o">.</span><span class="n">dir_edges</span><span class="p">)</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="c1"># → [(&#39;X0&#39;, &#39;X2&#39;), (&#39;X1&#39;, &#39;X2&#39;), (&#39;X2&#39;, &#39;X3&#39;)]</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Undirected edges:&quot;</span><span class="p">,</span> <span class="n">pdag</span><span class="o">.</span><span class="n">undir_edges</span><span class="p">)</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="c1"># → []</span>
+<h3 id="continuous-data-nonparanormal-fisher-z-test">Continuous data (Nonparanormal Fisher Z test)</h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mixpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">PC</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">n</span> <span class="o">=</span> <span class="mi">2000</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Ground truth: X0 -&gt; X2 &lt;- X1, X2 -&gt; X3</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="n">x0</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="n">x1</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="n">x2</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">x1</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="n">x3</span> <span class="o">=</span> <span class="n">x2</span> <span class="o">+</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;X0&quot;</span><span class="p">:</span> <span class="n">x0</span><span class="p">,</span> <span class="s2">&quot;X1&quot;</span><span class="p">:</span> <span class="n">x1</span><span class="p">,</span> <span class="s2">&quot;X2&quot;</span><span class="p">:</span> <span class="n">x2</span><span class="p">,</span> <span class="s2">&quot;X3&quot;</span><span class="p">:</span> <span class="n">x3</span><span class="p">}</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="n">pc</span> <span class="o">=</span> <span class="n">PC</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="n">pdag</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">learn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">v_structure_rule</span><span class="o">=</span><span class="s2">&quot;conservative&quot;</span><span class="p">)</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Directed edges:&quot;</span><span class="p">,</span> <span class="n">pdag</span><span class="o">.</span><span class="n">dir_edges</span><span class="p">)</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="c1"># → [(&#39;X0&#39;, &#39;X2&#39;), (&#39;X1&#39;, &#39;X2&#39;), (&#39;X2&#39;, &#39;X3&#39;)]</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Undirected edges:&quot;</span><span class="p">,</span> <span class="n">pdag</span><span class="o">.</span><span class="n">undir_edges</span><span class="p">)</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="c1"># → []</span>
 </span></code></pre></div>
 <h3 id="mixed-data-continuous-ordinal">Mixed data (continuous + ordinal)</h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mixpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">PC</span><span class="p">,</span> <span class="n">MixedFisherZ</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">n</span> <span class="o">=</span> <span class="mi">3000</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">x0</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="n">x1</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="n">x2</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">x1</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="c1"># X3 is ordinal (5 categories)</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="n">quantiles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">80</span><span class="p">])</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="n">x3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">quantiles</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;X0&quot;</span><span class="p">:</span> <span class="n">x0</span><span class="p">,</span> <span class="s2">&quot;X1&quot;</span><span class="p">:</span> <span class="n">x1</span><span class="p">,</span> <span class="s2">&quot;X2&quot;</span><span class="p">:</span> <span class="n">x2</span><span class="p">,</span> <span class="s2">&quot;X3&quot;</span><span class="p">:</span> <span class="n">x3</span><span class="p">}</span>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="n">pc</span> <span class="o">=</span> <span class="n">PC</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="n">MixedFisherZ</span><span class="p">)</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="n">pdag</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">learn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">v_structure_rule</span><span class="o">=</span><span class="s2">&quot;majority&quot;</span><span class="p">)</span>
-</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>
-</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Directed edges:&quot;</span><span class="p">,</span> <span class="n">pdag</span><span class="o">.</span><span class="n">dir_edges</span><span class="p">)</span>
-</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="c1"># → [(&#39;X0&#39;, &#39;X2&#39;), (&#39;X1&#39;, &#39;X2&#39;), (&#39;X2&#39;, &#39;X3&#39;)]</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mixpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">PC</span><span class="p">,</span> <span class="n">MixedFisherZ</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">n</span> <span class="o">=</span> <span class="mi">3000</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">x0</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="n">x1</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="n">x2</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">x1</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="c1"># X3 is ordinal (5 categories)</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="n">quantiles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">80</span><span class="p">])</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="n">x3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">quantiles</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;X0&quot;</span><span class="p">:</span> <span class="n">x0</span><span class="p">,</span> <span class="s2">&quot;X1&quot;</span><span class="p">:</span> <span class="n">x1</span><span class="p">,</span> <span class="s2">&quot;X2&quot;</span><span class="p">:</span> <span class="n">x2</span><span class="p">,</span> <span class="s2">&quot;X3&quot;</span><span class="p">:</span> <span class="n">x3</span><span class="p">}</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="n">pc</span> <span class="o">=</span> <span class="n">PC</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="n">MixedFisherZ</span><span class="p">)</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="n">pdag</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">learn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">v_structure_rule</span><span class="o">=</span><span class="s2">&quot;majority&quot;</span><span class="p">)</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Directed edges:&quot;</span><span class="p">,</span> <span class="n">pdag</span><span class="o">.</span><span class="n">dir_edges</span><span class="p">)</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="c1"># → [(&#39;X0&#39;, &#39;X2&#39;), (&#39;X1&#39;, &#39;X2&#39;), (&#39;X2&#39;, &#39;X3&#39;)]</span>
 </span></code></pre></div>
 <hr />
 <h2 id="orientation-strategies">Orientation strategies</h2>
@@ -748,10 +774,27 @@
 </tr>
 </tbody>
 </table>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;conservative&quot;</span><span class="p">,</span> <span class="s2">&quot;majority&quot;</span><span class="p">,</span> <span class="s2">&quot;pc-max&quot;</span><span class="p">):</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">pdag</span> <span class="o">=</span> <span class="n">PC</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span><span class="o">.</span><span class="n">learn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">v_structure_rule</span><span class="o">=</span><span class="n">rule</span><span class="p">)</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rule</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">pdag</span><span class="o">.</span><span class="n">dir_edges</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;conservative&quot;</span><span class="p">,</span> <span class="s2">&quot;majority&quot;</span><span class="p">,</span> <span class="s2">&quot;pc-max&quot;</span><span class="p">):</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">pdag</span> <span class="o">=</span> <span class="n">PC</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span><span class="o">.</span><span class="n">learn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">v_structure_rule</span><span class="o">=</span><span class="n">rule</span><span class="p">)</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rule</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">pdag</span><span class="o">.</span><span class="n">dir_edges</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span></code></pre></div>
+<hr />
+<h2 id="prior-knowledge">Prior knowledge</h2>
+<p><code>PriorKnowledge</code> bundles user-supplied constraints — required/forbidden edges, required/forbidden directions, and a partial temporal layering — and is consulted in all three PC phases: it prunes conditioning sets during skeleton discovery, blocks impossible v-structures, and propagates orientations through the Meek rules.</p>
+<p>Layering encodes a <em>partial</em> temporal order: each layer is a set of nodes whose mutual order is unknown, but every node in layer <code>k</code> precedes every node in layer <code>k+1</code>. This matches use cases such as production-line stations or time-stamped batches where intra-stage ordering is uncertain.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mixpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">PC</span><span class="p">,</span> <span class="n">PriorKnowledge</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># Three production-line stations; intra-station ordering unknown.</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">prior</span> <span class="o">=</span> <span class="n">PriorKnowledge</span><span class="p">(</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">layering</span><span class="o">=</span><span class="p">[[</span><span class="s2">&quot;X0&quot;</span><span class="p">,</span> <span class="s2">&quot;X1&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;X2&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;X3&quot;</span><span class="p">]],</span>   <span class="c1"># X0,X1 precede X2 precedes X3</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">forbidden_directions</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;X3&quot;</span><span class="p">,</span> <span class="s2">&quot;X2&quot;</span><span class="p">)],</span>       <span class="c1"># explicit override (redundant with layering here)</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">required_edges</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;X0&quot;</span><span class="p">,</span> <span class="s2">&quot;X2&quot;</span><span class="p">)],</span>             <span class="c1"># never tested for removal</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="p">)</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="n">pc</span> <span class="o">=</span> <span class="n">PC</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="n">pdag</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">learn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">v_structure_rule</span><span class="o">=</span><span class="s2">&quot;majority&quot;</span><span class="p">,</span> <span class="n">prior_knowledge</span><span class="o">=</span><span class="n">prior</span><span class="p">)</span>
+</span></code></pre></div>
+<p>All hint types compose; <code>PriorKnowledge.validate(nodes)</code> is called automatically and raises on internal contradictions (e.g. an edge that is both required and forbidden, or a <code>required_direction</code> that violates the layering).</p>
 <hr />
 <h2 id="graph-output">Graph output</h2>
 <p><code>learn_graph</code> returns a <code>PDAG</code> object. The <code>adjacency_matrix</code> property encodes:</p>
@@ -760,22 +803,22 @@
 <li><code>A[i,j]=1, A[j,i]=1</code> — undirected edge i—j</li>
 <li><code>A[i,j]=0, A[j,i]=0</code> — no edge</li>
 </ul>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">print</span><span class="p">(</span><span class="n">pc</span><span class="o">.</span><span class="n">adjacency_matrix</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">print</span><span class="p">(</span><span class="n">pc</span><span class="o">.</span><span class="n">adjacency_matrix</span><span class="p">)</span>
 </span></code></pre></div>
 <hr />
 <h2 id="developer-guide">Developer Guide</h2>
 <h3 id="pre-commit-hooks">Pre-commit hooks</h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>make<span class="w"> </span>precommit
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>make<span class="w"> </span>precommit
 </span></code></pre></div>
 <p>Runs ruff (lint + format), mypy (strict), bandit (security), and file hygiene checks on every commit.</p>
 <h3 id="documentation-mkdocs">Documentation (MkDocs)</h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">source</span><span class="w"> </span>venv_mixpc/bin/activate
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>mkdocs<span class="w"> </span>serve<span class="w">      </span><span class="c1"># live preview at http://127.0.0.1:8000</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>mkdocs<span class="w"> </span>build<span class="w">      </span><span class="c1"># static output in site/</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nb">source</span><span class="w"> </span>venv_mixed-pc/bin/activate
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>mkdocs<span class="w"> </span>serve<span class="w">      </span><span class="c1"># live preview at http://127.0.0.1:8000</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>mkdocs<span class="w"> </span>build<span class="w">      </span><span class="c1"># static output in site/</span>
 </span></code></pre></div>
 <h3 id="deploy-to-github-pages">Deploy to GitHub Pages</h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mike<span class="w"> </span>deploy<span class="w"> </span>--push<span class="w"> </span>--update-aliases<span class="w"> </span><span class="m">0</span>.1.0<span class="w"> </span>latest
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>mike<span class="w"> </span>set-default<span class="w"> </span>--push<span class="w"> </span>latest<span class="w">   </span><span class="c1"># first time only</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mike<span class="w"> </span>deploy<span class="w"> </span>--push<span class="w"> </span>--update-aliases<span class="w"> </span><span class="m">0</span>.1.0<span class="w"> </span>latest
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>mike<span class="w"> </span>set-default<span class="w"> </span>--push<span class="w"> </span>latest<span class="w">   </span><span class="c1"># first time only</span>
 </span></code></pre></div>
 <blockquote>
 <p><strong>Prerequisite:</strong> enable GitHub Pages in repository Settings → Pages → Source: <code>gh-pages</code> branch.</p>
@@ -787,6 +830,7 @@
 <li>Colombo, D. &amp; Maathuis, M.H. (2014). Order-independent constraint-based causal structure learning. <em>JMLR</em> 15, 3741–3782.</li>
 <li>Ramsey, J., Zhang, J. &amp; Spirtes, P. (2016). Adjacency-faithfulness and conservative causal inference. <em>UAI</em>.</li>
 <li>Liu, H., Lafferty, J. &amp; Wasserman, L. (2009). The nonparanormal. <em>JMLR</em> 10, 2295–2328.</li>
+<li>Göbler, K., Drton, M., Mukherjee, S. &amp; Miloschewski, A. (2024). High-dimensional undirected graphical models for arbitrary mixed data. <em>Electronic Journal of Statistics</em> 18(1). <a href="https://doi.org/10.1214/24-EJS2254">doi:10.1214/24-EJS2254</a>.</li>
 </ul>
 
 
