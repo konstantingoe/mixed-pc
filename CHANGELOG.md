@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-04-28
+
 ### Changed
 - `PDAG.dir_edges` and `PDAG.undir_edges` now return sorted lists, so iteration
   order is stable across runs regardless of the order in which edges were
@@ -39,5 +41,6 @@ Initial release.
   skeleton discovery, v-structure orientation, and Meek propagation.
 - PEP 561 `py.typed` marker.
 
-[Unreleased]: https://github.com/konstantingoe/mixed-pc/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/konstantingoe/mixed-pc/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/konstantingoe/mixed-pc/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/konstantingoe/mixed-pc/releases/tag/v0.1.0
