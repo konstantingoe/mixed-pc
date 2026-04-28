@@ -205,7 +205,7 @@ mkdocs build   # static site in site/
 ### Deploy to GitHub Pages
 
 ```bash
-mike deploy --push --update-aliases 0.1.0 latest
+mike deploy --push --update-aliases 0.1.1 latest
 mike set-default --push latest   # first time only
 ```
 

@@ -73,9 +73,11 @@ x0 = rng.normal(size=(n, 1))
 x1 = rng.normal(size=(n, 1))
 x2 = x0 + x1 + 0.5 * rng.normal(size=(n, 1))
 
-# X3 is ordinal (5 categories)
-quantiles = np.percentile(x2, [20, 40, 60, 80])
-x3 = np.searchsorted(quantiles, x2).reshape(n, 1).astype(float)
+# X3 is ordinal. The polyserial CI test assumes a latent continuous z3
+# of which the observed ordinal X3 is a thresholded version.
+z3 = x2 + 0.5 * rng.normal(size=(n, 1))
+thresholds = np.percentile(z3, [20, 40, 60, 80])
+x3 = np.searchsorted(thresholds, z3).reshape(n, 1).astype(float)
 
 data = {"X0": x0, "X1": x1, "X2": x2, "X3": x3}
 
@@ -165,7 +167,7 @@ mkdocs build      # static output in site/
 ### Deploy to GitHub Pages
 
 ```bash
-mike deploy --push --update-aliases 0.1.0 latest
+mike deploy --push --update-aliases 0.1.1 latest
 mike set-default --push latest   # first time only
 ```
 
