@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- `PDAG.dir_edges` and `PDAG.undir_edges` now return sorted lists, so iteration
+  order is stable across runs regardless of the order in which edges were
+  added. Internal membership checks bypass the sort by going through the
+  underlying sets, so hot paths (`is_adjacent`, Meek rules) stay O(1) per probe.
+- Release workflow split: prerelease tags (`rc`/`alpha`/`beta`/`dev`) publish
+  to TestPyPI; stable tags publish to PyPI directly with no cross-dependency.
+
+### Fixed
+- README and docs `MixedFisherZ` example: replaced the deterministic
+  discretization (`x3 = searchsorted(quantiles_of_x2, x2)`) with a thresholded
+  latent variable `z3 = x2 + noise`, matching the generative model the
+  polyserial CI test is built on. The published seed now reproducibly
+  recovers `X0 → X2 ← X1, X2 → X3`.
+
 ## [0.1.0] - 2026-04-23
 
 Initial release.
