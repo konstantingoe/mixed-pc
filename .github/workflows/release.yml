@@ -34,9 +34,30 @@ jobs:
           name: dist
           path: dist/
 
+  publish-testpypi:
+    name: Publish to TestPyPI
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/mixpc
+    permissions:
+      id-token: write   # OIDC trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish via TestPyPI trusted publishing
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
   publish:
     name: Publish to PyPI
-    needs: build
+    needs: [build, publish-testpypi]
     runs-on: ubuntu-latest
     # Only stable tags reach PyPI. Prereleases (rc/alpha/beta/dev) build but
     # don't publish — use TestPyPI for those. PEP 440 short forms (a1, b1)
