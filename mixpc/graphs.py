@@ -816,18 +816,18 @@ class PDAG(GRAPH):
         """Gives all undirected edges in current PDAG.
 
         Returns:
-            list[tuple[str,str]]: List of undirected edges.
+            list[tuple[str,str]]: List of undirected edges, sorted for determinism.
         """
-        return list(self._undir_edges)
+        return sorted(self._undir_edges)
 
     @property
     def dir_edges(self) -> list[tuple[str, str]]:
         """Gives all directed edges in current PDAG.
 
         Returns:
-            list[tuple[str,str]]: List of directed edges.
+            list[tuple[str,str]]: List of directed edges, sorted for determinism.
         """
-        return list(self._dir_edges)
+        return sorted(self._dir_edges)
 
 
 def vstructs(dag: nx.DiGraph) -> set[tuple[str, str]]:
