@@ -38,7 +38,15 @@ jobs:
     name: Publish to TestPyPI
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    # Prereleases only. Cut an rc/alpha/beta/dev tag, smoke-test the install
+    # from TestPyPI, then cut the matching stable tag for PyPI. PEP 440 short
+    # forms (a1, b1) are not covered; spell prereleases out (e.g. v0.1.1rc1).
+    if: |
+      startsWith(github.ref, 'refs/tags/v') &&
+      (contains(github.ref_name, 'rc') ||
+       contains(github.ref_name, 'alpha') ||
+       contains(github.ref_name, 'beta') ||
+       contains(github.ref_name, 'dev'))
     environment:
       name: testpypi
       url: https://test.pypi.org/p/mixpc
@@ -57,11 +65,10 @@ jobs:
 
   publish:
     name: Publish to PyPI
-    needs: [build, publish-testpypi]
+    needs: build
     runs-on: ubuntu-latest
-    # Only stable tags reach PyPI. Prereleases (rc/alpha/beta/dev) build but
-    # don't publish — use TestPyPI for those. PEP 440 short forms (a1, b1)
-    # are not covered; spell prereleases out in tag names (e.g. v0.1.0rc1).
+    # Stable tags only. Prerelease tags route to TestPyPI above; verify those
+    # by hand before cutting the corresponding stable tag.
     if: |
       startsWith(github.ref, 'refs/tags/v') &&
       !contains(github.ref_name, 'rc') &&
