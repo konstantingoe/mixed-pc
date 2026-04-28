@@ -268,6 +268,25 @@ class TestPDAG:
         assert p.num_undir_edges == 0
         assert ("A", "B") in p.dir_edges
 
+    def test_edge_lists_are_sorted_and_insertion_order_independent(self) -> None:
+        # dir_edges and undir_edges must return a deterministic, sorted view of the
+        # underlying sets so callers can rely on stable iteration order regardless of
+        # the order in which edges were added.
+        dir_a = [("C", "D"), ("A", "B"), ("B", "C")]
+        undir_a = [("X", "Y"), ("P", "Q"), ("M", "N")]
+        p = PDAG(dir_edges=dir_a, undir_edges=undir_a)
+
+        assert p.dir_edges == sorted(dir_a)
+        assert p.undir_edges == sorted(undir_a)
+        # Stable across repeated calls.
+        assert p.dir_edges == p.dir_edges
+        assert p.undir_edges == p.undir_edges
+
+        # Same edge set, different insertion order → identical returned lists.
+        q = PDAG(dir_edges=list(reversed(dir_a)), undir_edges=list(reversed(undir_a)))
+        assert q.dir_edges == p.dir_edges
+        assert q.undir_edges == p.undir_edges
+
     def test_vstructs(self) -> None:
         # A -> C <- B with A-B not adjacent
         p = PDAG(dir_edges=[("A", "C"), ("B", "C")])

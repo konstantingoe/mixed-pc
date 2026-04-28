@@ -396,10 +396,12 @@ class PDAG(GRAPH):
         Returns:
             bool: True if i-j or i->j or i<-j
         """
-        return any((
-            (j, i) in self.dir_edges or (j, i) in self.undir_edges,
-            (i, j) in self.dir_edges or (i, j) in self.undir_edges,
-        ))
+        return (
+            (i, j) in self._dir_edges
+            or (j, i) in self._dir_edges
+            or (i, j) in self._undir_edges
+            or (j, i) in self._undir_edges
+        )
 
     def is_clique(self, potential_clique: set[str]) -> bool:
         """Check every pair of node X potential_clique is adjacent."""
@@ -441,7 +443,7 @@ class PDAG(GRAPH):
         Raises:
             AssertionError: if edge does not exist
         """
-        if (i, j) not in self.dir_edges and (i, j) not in self.undir_edges:
+        if (i, j) not in self._dir_edges and (i, j) not in self._undir_edges:
             raise AssertionError("Edge does not exist in current PDAG")
 
         self._undir_edges.discard((i, j))
@@ -466,10 +468,7 @@ class PDAG(GRAPH):
         Raises:
             AssertionError: if edge does not exist or is not undirected.
         """
-        if (tail, head) not in self.undir_edges and (
-            head,
-            tail,
-        ) not in self.undir_edges:
+        if (tail, head) not in self._undir_edges and (head, tail) not in self._undir_edges:
             raise AssertionError("Edge seems not to be undirected or even there at all.")
         self._undir_edges.discard((tail, head))
         self._undir_edges.discard((head, tail))
@@ -816,18 +815,18 @@ class PDAG(GRAPH):
         """Gives all undirected edges in current PDAG.
 
         Returns:
-            list[tuple[str,str]]: List of undirected edges.
+            list[tuple[str,str]]: List of undirected edges, sorted for determinism.
         """
-        return list(self._undir_edges)
+        return sorted(self._undir_edges)
 
     @property
     def dir_edges(self) -> list[tuple[str, str]]:
         """Gives all directed edges in current PDAG.
 
         Returns:
-            list[tuple[str,str]]: List of directed edges.
+            list[tuple[str,str]]: List of directed edges, sorted for determinism.
         """
-        return list(self._dir_edges)
+        return sorted(self._dir_edges)
 
 
 def vstructs(dag: nx.DiGraph) -> set[tuple[str, str]]:
