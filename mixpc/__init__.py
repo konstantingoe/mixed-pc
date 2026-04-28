@@ -1,6 +1,6 @@
 """Python package for mixpc."""
 
-__version__ = "0.1.1.rc2"
+__version__ = "0.1.1.rc3"
 
 from .pc_algorithm import PC
 from .independence_tests import MixedFisherZ
